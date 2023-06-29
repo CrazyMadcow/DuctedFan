@@ -9,9 +9,9 @@ class Plot():
         self.ground = pv.Plane(i_size=100, j_size=100)
 
         self.camera = pv.Camera()
-        self.cameraOffSet = (18.0, 18.0, 18.0)
-        self.cameraView = 'Chase'
-        self.camera.position = (18.0, 18.0, 18.0)
+        self.cameraOffSet = (25.0, 25.0, 25.0)
+        self.cameraView = 'fixed'
+        self.camera.position = (25.0, 25.0, 25.0)
         self.camera.focal_point = (0.0, 0.0, 0.0)
         self.camera.roll = -120.0
 
@@ -26,7 +26,7 @@ class Plot():
         self.object.yaw = 0
         self.object.rotationAxis = (0,0,1)
         self.object.rotationAngle = 0
-        self.object.rotationOffset = (-90,0,0)
+        self.object.rotationOffset = (0,0,0)
 
         self.axes = pv.Axes(show_actor=True, actor_scale=1.0, line_width=5)
         self.axes.origin = (0.0, 0.0, 0.0)
@@ -150,7 +150,7 @@ def DCM2RotationAxis(R):
 
 # ground = pv.Plane(i_size = 10, j_size = 10)
 # ductedfanModel = pv.read('ductedfan.stl')
-# ductedfanModel.points *=10
+# ductedfanModel.points *=0.03
 # # ductedfanModel.flip_z()
 # # ductedfanModel.flip_y()
 # # ductedfanModel.flip_x()
@@ -172,13 +172,13 @@ def DCM2RotationAxis(R):
 # phi = 0
 # e = (0,0,1)
 # R = EulerDCM(0, 00 * np.pi / 180, -90 * np.pi / 180).T
-# phi, e = DCM2RotationAxis(R)
-# ductedfanModel.translate((1,1,2),inplace=True)
-# ductedfanModel.rotate_vector(vector=e, angle=phi*180/np.pi, point = (1,1,2), inplace=True)
-# p = Plot()
+# # phi, e = DCM2RotationAxis(R)
+# # ductedfanModel.translate((1,1,2),inplace=True)
+# # ductedfanModel.rotate_vector(vector=e, angle=phi*180/np.pi, point = (1,1,2), inplace=True)
+# # p = Plot()
 #
-# p.UpdatePlot(1,1,-2,0,0,np.pi/2)
-# p.plot.show()
+# # p.UpdatePlot(1,1,-2,0,0,np.pi/2)
+# p.show()
 # p.open_gif('move.gif', fps=20)
 # for i in range(100):
 #     ductedfanModel.rotate_vector(vector=e, angle=-phi * 180 / np.pi, inplace=True)

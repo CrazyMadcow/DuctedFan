@@ -8,7 +8,7 @@ class Sim():
       self.nx       =   model.nx
       self.nu       =   model.nu
       self.t0       =   0
-      self.tf       =   16
+      self.tf       =   10
       self.dt       =   0.05
       self.X0       =   torch.zeros((self.nx,1), device = self.device)
       self.X0[0, :] = 3

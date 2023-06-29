@@ -6,9 +6,15 @@ def InitDuctedFan(model):
     model.nu        =   6
     model.m         =   1
     model.g         =   9.81
+    model.dz        =   0.3
+    model.d         =   0.1
+    model.finA      =   0.005
     model.Ix        =   0.01
     model.Iy        =   0.01
     model.Iz        =   0.02
+    model.rpmMax    =   8768
+    model.thrustMax =   1.233*9.81
+    model.cT        =   0.032
     model.f         =   StateDynamicsDuctedFan
     model.G         =   ControlDynamicsDuctedFan
     model.platform  =   "DuctedFan"
@@ -76,7 +82,7 @@ def ControlDynamicsDuctedFan(model, X, U):
     pitch       =   X[7, :]
     yaw         =   X[8, :]
 
-    Fx, Fy, Fz, L, M, N     =   QuadrotorForceMomentGen(model, X, U)
+    Fx, Fy, Fz, L, M, N     =   DuctedFanForceMomentGen(model, X, U)
 
     G[3,:]      =   Fx / m
     G[4,:]      =   Fy / m
@@ -147,6 +153,80 @@ def QuadrotorForceMomentGen(model, X, U):
     LThrust     =   Lcmd
     MThrust     =   Mcmd
     NThrust     =   Ncmd
+
+    Fx          =   FxGrav + FxAero + FxThrust
+    Fy          =   FyGrav + FyAero + FyThrust
+    Fz          =   FzGrav + FzAero + FzThrust
+
+    L           =   LGrav + LAero + LThrust
+    M           =   MGrav + MAero + MThrust
+    N           =   NGrav + NAero + NThrust
+
+    return Fx, Fy, Fz, L, M, N
+
+
+def DuctedFanForceMomentGen(model, X, U):
+    m           =   model.m
+    g           =   model.g
+    dz          =   model.dz
+    d           =   model.d
+    finA        =   model.finA
+    Ix          =   model.Ix
+    Iy          =   model.Iy
+    Iz          =   model.Iz
+    rpmMax      =   model.rpmMax
+    thrustMax   =   model.thrustMax
+    cT          =   model.cT
+
+    N           =   X[0, :]
+    E           =   X[1, :]
+    D           =   X[2, :]
+    u           =   X[3, :]
+    v           =   X[4, :]
+    w           =   X[5, :]
+
+    roll        =   X[6, :]
+    pitch       =   X[7, :]
+    yaw         =   X[8, :]
+    p           =   X[9, :]
+    q           =   X[10, :]
+    r           =   X[11, :]
+
+    T1Cmd       =   U[0,:]
+    T2Cmd       =   U[1, :]
+    del1Cmd     =   U[2, :]
+    del2Cmd     =   U[3, :]
+    del3Cmd     =   U[4, :]
+    del4Cmd     =   U[5, :]
+
+    # gravity zone
+    Grav        =   torch.tensor([[0],[0],[g]])
+    R           =   EulerDCM(roll, pitch, yaw)
+    FGrav       =   torch.matmul(R.T, m*Grav)
+    FxGrav      =   FGrav[0, 0]
+    FyGrav      =   FGrav[1, 0]
+    FzGrav      =   FGrav[2, 0]
+    LGrav       =   0
+    MGrav       =   0
+    NGrav       =   0
+
+    # Thrust zone
+    FxThrust    =   0
+    FyThrust    =   0
+    FzThrust    =   -T1Cmd - T2Cmd*(1-0.2*(T1Cmd/thrustMax))
+    LThrust     =   0
+    MThrust     =   0
+    NThrust     =   T1Cmd*cT - T2Cmd*(1-0.2*(T1Cmd/thrustMax))*cT
+
+    # Aerodynamic zone
+    V           =   torch.sqrt(T2Cmd/thrustMax)*17.0
+    q           =   0.5*1.225*finA*torch.pow(V,2)
+    FxAero      =   q*2.0*torch.pi* (del2Cmd - del4Cmd)
+    FyAero      =   q*2.0*torch.pi* (del1Cmd - del3Cmd)
+    FzAero      =   0
+    LAero       =   q*dz*2.0*torch.pi* (-del1Cmd + del3Cmd)
+    MAero       =   q*dz*2.0*torch.pi* (del2Cmd - del4Cmd)
+    NAero       =   q*d*2.0*torch.pi* (del1Cmd + del2Cmd + del3Cmd + del4Cmd)
 
     Fx          =   FxGrav + FxAero + FxThrust
     Fy          =   FyGrav + FyAero + FyThrust

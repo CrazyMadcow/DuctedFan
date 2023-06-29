@@ -13,16 +13,21 @@ if __name__ == '__main__':
 
     sim         =   Sim(model)
 
-    plot        =   Plot()
+    plot        =   Plot(object='ductedfan')
     for i in range(len(sim.t)):
 
         sim.XHist[:, i] = sim.X.T
         sim.UHist[:, i] = sim.U.T
 
-        sim.U[0,0]  =   -model.m*model.g/(torch.cos(sim.X[6,:])*torch.cos(sim.X[7,:]))
-        sim.U[1,0]  =   0.1*(0.0 - sim.X[6, :]) - 0.1 * sim.X[9, :]
-        sim.U[2,0]  =   0.1*(-0.3 - sim.X[7, :]) - 0.1 * sim.X[10, :]
-        sim.U[3,0]  =   0.2*(1.0 - sim.X[8, :]) - 0.2 * sim.X[11, :]
+        TCmd = 0.5*( -2.5*( -10.0 -sim.X[2,0]) + 9.81)
+        delCmd = 0.5*(0 - sim.X[11,0])
+
+        sim.U[0,0]  =   TCmd
+        sim.U[1,0]  =   TCmd
+        sim.U[2,0]  =   delCmd
+        sim.U[3,0]  =   delCmd
+        sim.U[4,0]  =   delCmd
+        sim.U[5,0]  =   delCmd
 
         Xdot = model.Dynamics(sim.X, sim.U)
 
